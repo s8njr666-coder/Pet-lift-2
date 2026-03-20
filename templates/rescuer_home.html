@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetLift – Rescuer</title>
+  <style>
+    body { margin: 0; font-family: system-ui, sans-serif;
+           background: #F9FBFB; color: #0D2E2C; }
+    .wrap { max-width: 480px; margin: 0 auto; padding: 1.5rem; }
+    .header { background: #2ABFB3; padding: 1rem 1.5rem;
+              color: white; font-size: 1.2rem; font-weight: 900; }
+    .card { background: white; border-radius: 16px; padding: 1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+    .btn { display: inline-block; border: none; border-radius: 999px;
+           padding: 0.6rem 1.2rem; font-size: 0.95rem;
+           font-weight: 800; cursor: pointer; }
+    .orange { background: #FF7940; color: #0D2E2C; }
+    .teal { background: #2ABFB3; color: white; }
+    .full { width: 100%; display: block; padding: 0.9rem;
+            text-align: center; margin-top: 0.5rem; }
+    label { display: block; font-size: 0.8rem; font-weight: 700;
+            color: #6B8F8D; text-transform: uppercase;
+            letter-spacing: 0.05em; margin-bottom: 4px; margin-top: 12px; }
+    input, select { width: 100%; padding: 0.6rem 0.8rem;
+                    border-radius: 10px; border: 1.5px solid #E6F8F7;
+                    font-size: 0.95rem; background: #F9FBFB;
+                    box-sizing: border-box; }
+    .muted { color: #6B8F8D; font-size: 0.85rem; }
+    .status-open { color: #2ABFB3; font-weight: 700; }
+    .status-claimed { color: #FF7940; font-weight: 700; }
+    .status-done { color: #6B8F8D; font-weight: 700; }
+    .back { color: white; text-decoration: none; margin-right: 12px; font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a class="back" href="/">←</a>🐱 Rescuer Home
+  </div>
+  <div class="wrap">
+
+    <h3>Post a New Ride Request</h3>
+    <div class="card">
+      <form method="post" action="/rescuer">
+        <label>Pickup Neighborhood</label>
+        <input type="text" name="pickup_loc"
+               placeholder="e.g. Ahwatukee" required>
+
+        <label>Destination Clinic</label>
+        <select name="dropoff_clinic">
+          <option>Altered Tails</option>
+          <option>Fix.Adopt.Save Clinic</option>
+          <option>Humane Animal Rescue</option>
+          <option>SNAP Spay &amp; Neuter</option>
+        </select>
+
+        <label>Number of Crates</label>
+        <input type="number" name="crate_count"
+               min="1" max="10" value="1">
+
+        <label>Reason</label>
+        <select name="reason">
+          <option>Spay Day</option>
+          <option>Vaccines</option>
+          <option>Emergency</option>
+          <option>Foster Transfer</option>
+          <option>Adoption Event</option>
+        </select>
+
+        <p class="muted" style="margin-top:12px">
+          Drivers are volunteers — times may vary. Thank you! 🐾
+        </p>
+
+        <button type="submit" class="btn orange full">
+          Submit Request
+        </button>
+      </form>
+    </div>
+
+    <h3>My Requests</h3>
+    {% for r in requests %}
+      <div class="card">
+        <strong>🐱 {{ r['crate_count'] }} crates</strong>
+        — {{ r['reason'] or 'Clinic visit' }}<br>
+        <span class="muted">Pickup: {{ r['pickup_loc'] }}</span><br>
+        <span class="muted">Destination: {{ r['dropoff_clinic'] }}</span><br>
+        <span class="status-{{ r['status'] }}">
+          Status: {{ r['status'] }}
+        </span>
+      </div>
+    {% else %}
+      <p class="muted">No requests yet. Post one above!</p>
+    {% endfor %}
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetLift – Driver</title>
+  <style>
+    body { margin: 0; font-family: system-ui, sans-serif;
+           background: #F9FBFB; color: #0D2E2C; }
+    .wrap { max-width: 480px; margin: 0 auto; padding: 1.5rem; }
+    .header { background: #2ABFB3; padding: 1rem 1.5rem;
+              color: white; font-size: 1.2rem; font-weight: 900; }
+    .card { background: white; border-radius: 16px; padding: 1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+    .live-card { border: 2px solid #FF7940;
+                 box-shadow: 0 4px 20px rgba(255,121,64,0.15); }
+    .btn { display: inline-block; border: none; border-radius: 999px;
+           padding: 0.6rem 1.2rem; font-size: 0.95rem;
+           font-weight: 800; cursor: pointer; }
+    .orange { background: #FF7940; color: #0D2E2C; }
+    .teal { background: #2ABFB3; color: white; }
+    .full { width: 100%; display: block; padding: 0.9rem;
+            text-align: center; margin-top: 0.75rem;
+            box-sizing: border-box; }
+    .muted { color: #6B8F8D; font-size: 0.85rem; }
+    .badge { display: inline-block; background: #E6F8F7;
+             color: #1A8F86; border-radius: 999px;
+             padding: 2px 10px; font-size: 0.75rem;
+             font-weight: 800; margin-top: 4px; }
+    .live-badge { background: #FFF0E9; color: #FF7940; }
+    select { padding: 0.5rem; border-radius: 10px;
+             border: 1.5px solid #E6F8F7; font-size: 0.9rem;
+             background: #F9FBFB; margin-right: 8px; }
+    .back { color: white; text-decoration: none;
+            margin-right: 12px; font-size: 1.2rem; }
+    .thank-you { text-align: center; color: #6B8F8D;
+                 font-size: 0.85rem; margin-bottom: 1.5rem; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a class="back" href="/">←</a>🚗 Driver Home
+  </div>
+  <div class="wrap">
+    <p class="thank-you">
+      Thank you for helping our community cats get to the clinic safely. 🐾
+    </p>
+
+    {% if active_trips %}
+      <h3>🔴 Live Trip</h3>
+      {% for trip in active_trips %}
+        <div class="card live-card">
+          <span class="badge live-badge">LIVE TRIP</span><br><br>
+          <strong>🐱 {{ trip['crate_count'] }} crates</strong>
+          — {{ trip['reason'] or 'Clinic visit' }}<br>
+          <span class="muted">Pickup: {{ trip['pickup_loc'] }}</span><br>
+          <span class="muted">
+            Destination: {{ trip['dropoff_clinic'] }}
+          </span><br><br>
+          <span class="muted">Status: </span>
+          <strong>{{ trip['status'] }}</strong><br>
+
+          {% if trip['status'] != 'done' %}
+            <form method="post"
+                  action="/trip/{{ trip['trip_id'] }}/status">
+              <select name="status">
+                <option value="scheduled">Scheduled</option>
+                <option value="in_transit">In Transit</option>
+                <option value="at_clinic">At Clinic</option>
+                <option value="done">Done</option>
+              </select>
+              <button type="submit" class="btn orange">
+                Update
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <h3>Available Requests</h3>
+    {% for r in open_requests %}
+      <div class="card">
+        <strong>🐱 {{ r['crate_count'] }} crates</strong>
+        — {{ r['reason'] or 'Clinic visit' }}<br>
+        <span class="muted">Pickup: {{ r['pickup_loc'] }}</span><br>
+        <span class="muted">
+          Destination: {{ r['dropoff_clinic'] }}
+        </span><br>
+        <span class="badge">Fits your vehicle</span>
+        <form method="post"
+              action="/driver/claim/{{ r['request_id'] }}">
+          <button type="submit" class="btn teal full">
+            Claim Trip
+          </button>
+        </form>
+      </div>
+    {% else %}
+      <p class="muted">No open requests right now. Check back soon!</p>
+    {% endfor %}
+
+  </div>
+</body>
+</html>
