@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetLift – Sign Up</title>
+  <style>
+    body { margin: 0; font-family: system-ui, sans-serif;
+           background: #2ABFB3; min-height: 100vh;
+           display: flex; align-items: center; justify-content: center; }
+    .card { background: white; border-radius: 24px;
+            padding: 2rem 1.5rem; width: 100%;
+            max-width: 400px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+    .title { font-size: 1.6rem; font-weight: 900;
+             color: #0D2E2C; margin-bottom: 0.25rem; }
+    .sub { color: #6B8F8D; font-size: 0.9rem; margin-bottom: 1.5rem; }
+    label { display: block; font-size: 0.8rem; font-weight: 700;
+            color: #6B8F8D; text-transform: uppercase;
+            letter-spacing: 0.05em; margin-bottom: 4px; margin-top: 14px; }
+    input, select { width: 100%; padding: 0.7rem 0.9rem;
+                    border-radius: 12px; border: 1.5px solid #E6F8F7;
+                    font-size: 0.95rem; background: #F9FBFB;
+                    box-sizing: border-box; color: #0D2E2C; }
+    .role-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+    .role-btn { padding: 0.8rem; border-radius: 12px;
+                border: 2px solid #E6F8F7; background: #F9FBFB;
+                cursor: pointer; text-align: center; font-weight: 700;
+                font-size: 0.9rem; color: #6B8F8D; transition: all 0.2s; }
+    .role-btn.selected { border-color: #2ABFB3; background: #E6F8F7; color: #0D2E2C; }
+    .btn { display: block; width: 100%; padding: 0.9rem;
+           margin-top: 1.5rem; border-radius: 999px;
+           background: #FF7940; color: #0D2E2C; border: none;
+           font-size: 1rem; font-weight: 800; cursor: pointer; }
+    .flash { background: #FFF0E9; color: #FF7940; padding: 0.7rem 1rem;
+             border-radius: 10px; font-size: 0.9rem; margin-bottom: 1rem; }
+    .login-link { text-align: center; margin-top: 1rem;
+                  font-size: 0.9rem; color: #6B8F8D; }
+    .login-link a { color: #2ABFB3; font-weight: 700; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="title">🐾 Join PetLift</div>
+    <div class="sub">Create your free account</div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" action="/signup">
+      <label>Your Name</label>
+      <input type="text" name="name" placeholder="First and last name" required>
+
+      <label>Email Address</label>
+      <input type="email" name="email" placeholder="you@email.com" required>
+
+      <label>Password</label>
+      <input type="password" name="password"
+             placeholder="At least 8 characters" required>
+
+      <label>I am a...</label>
+      <div class="role-row">
+        <div class="role-btn" id="btn-rescuer"
+             onclick="selectRole('rescuer')">
+          🐱 Rescuer /<br>Colony Manager
+        </div>
+        <div class="role-btn" id="btn-driver"
+             onclick="selectRole('driver')">
+          🚗 Volunteer<br>Driver
+        </div>
+      </div>
+      <input type="hidden" name="role" id="role-input" required>
+
+      <button type="submit" class="btn">Create Account</button>
+    </form>
+
+    <div class="login-link">
+      Already have an account? <a href="/login">Sign in</a>
+    </div>
+  </div>
+
+  <script>
+    function selectRole(role) {
+      document.getElementById('role-input').value = role;
+      document.getElementById('btn-rescuer').classList.remove('selected');
+      document.getElementById('btn-driver').classList.remove('selected');
+      document.getElementById('btn-' + role).classList.add('selected');
+    }
+  </script>
+</body>
+</html>

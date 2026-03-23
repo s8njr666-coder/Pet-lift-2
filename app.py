@@ -1,9 +1,19 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for
-from models import get_db, close_db, init_db
+from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+from models import get_db, close_db, init_db, get_user_by_email, get_user_by_id, User
 
 app = Flask(__name__)
-app.secret_key = "petlift-secret"
+app.secret_key = "petlift-secret-2026"
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
+
+@login_manager.user_loader
+def load_user(user_id):
+    return get_user_by_id(int(user_id))
 
 @app.before_request
 def setup():
@@ -13,14 +23,64 @@ def setup():
 def teardown_db(exception):
     close_db()
 
-RESCUER_ID = 1
-DRIVER_ID = 2
-
 @app.route("/")
 def index():
     return render_template("index.html")
 
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if request.method == "POST":
+        name = request.form["name"]
+        email = request.form["email"]
+        password = request.form["password"]
+        role = request.form["role"]
+        hashed = generate_password_hash(password)
+        db = get_db()
+        try:
+            db.execute(
+                "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+                (name, email, hashed, role)
+            )
+            db.commit()
+            user = get_user_by_email(email)
+            login_user(user)
+            if role == "rescuer":
+                return redirect(url_for("rescuer_home"))
+            else:
+                return redirect(url_for("driver_home"))
+        except:
+            flash("An account with that email already exists.")
+            return redirect(url_for("signup"))
+    return render_template("signup.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form["email"]
+        password = request.form["password"]
+        db = get_db()
+        cur = db.execute(
+            "SELECT * FROM users WHERE email = ?", (email,)
+        )
+        row = cur.fetchone()
+        if row and check_password_hash(row["password"], password):
+            user = User(row["user_id"], row["name"], row["email"], row["role"])
+            login_user(user)
+            if row["role"] == "rescuer":
+                return redirect(url_for("rescuer_home"))
+            else:
+                return redirect(url_for("driver_home"))
+        flash("Invalid email or password.")
+    return render_template("login.html")
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("index"))
+
 @app.route("/rescuer", methods=["GET", "POST"])
+@login_required
 def rescuer_home():
     db = get_db()
     if request.method == "POST":
@@ -32,7 +92,7 @@ def rescuer_home():
             INSERT INTO transport_requests
             (rescuer_id, pickup_loc, dropoff_clinic, crate_count, reason)
             VALUES (?, ?, ?, ?, ?)
-        """, (RESCUER_ID, pickup, clinic, crates, reason))
+        """, (current_user.id, pickup, clinic, crates, reason))
         db.commit()
         return redirect(url_for("rescuer_home"))
     cur = db.execute("""
@@ -41,11 +101,12 @@ def rescuer_home():
         FROM transport_requests
         WHERE rescuer_id = ?
         ORDER BY created_at DESC
-    """, (RESCUER_ID,))
+    """, (current_user.id,))
     my_requests = cur.fetchall()
     return render_template("rescuer_home.html", requests=my_requests)
 
 @app.route("/driver")
+@login_required
 def driver_home():
     db = get_db()
     cur = db.execute("""
@@ -62,19 +123,20 @@ def driver_home():
         JOIN transport_requests r ON t.request_id = r.request_id
         WHERE t.driver_id = ? AND t.status != 'done'
         ORDER BY t.trip_id DESC
-    """, (DRIVER_ID,))
+    """, (current_user.id,))
     active_trips = cur2.fetchall()
     return render_template("driver_home.html",
                            open_requests=open_requests,
                            active_trips=active_trips)
 
 @app.route("/driver/claim/<int:request_id>", methods=["POST"])
+@login_required
 def claim_request(request_id):
     db = get_db()
     db.execute("""
         INSERT INTO trips (request_id, driver_id, status)
         VALUES (?, ?, 'scheduled')
-    """, (request_id, DRIVER_ID))
+    """, (request_id, current_user.id))
     db.execute("""
         UPDATE transport_requests SET status = 'claimed'
         WHERE request_id = ?
@@ -83,6 +145,7 @@ def claim_request(request_id):
     return redirect(url_for("driver_home"))
 
 @app.route("/trip/<int:trip_id>/status", methods=["POST"])
+@login_required
 def update_trip_status(trip_id):
     new_status = request.form["status"]
     db = get_db()

@@ -6,18 +6,25 @@
   <title>PetLift</title>
   <style>
     body { margin: 0; font-family: system-ui, sans-serif;
-           background: #2ABFB3; color: #0D2E2C; }
-    .wrap { max-width: 420px; margin: 0 auto; padding: 3rem 1.5rem; }
-    .title { font-size: 2rem; font-weight: 900; color: white; margin-bottom: 0.25rem; }
-    .sub { color: rgba(255,255,255,0.75); margin-bottom: 2.5rem; font-size: 1rem; }
-    .btn {
-      display: block; width: 100%; padding: 1rem;
-      margin-bottom: 0.75rem; border-radius: 999px;
-      text-align: center; text-decoration: none;
-      font-size: 1rem; font-weight: 800; border: none; cursor: pointer;
-    }
+           background: #2ABFB3; min-height: 100vh;
+           display: flex; align-items: center; justify-content: center; }
+    .wrap { width: 100%; max-width: 420px; padding: 2rem 1.5rem;
+            box-sizing: border-box; }
+    .title { font-size: 2.2rem; font-weight: 900;
+             color: white; margin-bottom: 0.25rem; }
+    .sub { color: rgba(255,255,255,0.8); margin-bottom: 2.5rem;
+           font-size: 1rem; line-height: 1.5; }
+    .btn { display: block; width: 100%; padding: 1rem;
+           margin-bottom: 0.75rem; border-radius: 999px;
+           text-align: center; text-decoration: none;
+           font-size: 1rem; font-weight: 800; border: none;
+           cursor: pointer; box-sizing: border-box; }
     .orange { background: #FF7940; color: #0D2E2C; }
-    .white { background: white; color: #0D2E2C; border: 2px solid white; }
+    .white { background: white; color: #0D2E2C; }
+    .outline { background: transparent; color: white;
+               border: 2px solid rgba(255,255,255,0.6); }
+    .divider { text-align: center; color: rgba(255,255,255,0.5);
+               font-size: 0.85rem; margin: 1rem 0; }
     .note { text-align: center; color: rgba(255,255,255,0.5);
             font-size: 0.8rem; margin-top: 1.5rem; }
   </style>
@@ -25,14 +32,17 @@
 <body>
   <div class="wrap">
     <div class="title">🐾 PetLift</div>
-    <div class="sub">Community rides for rescue pets in Phoenix.</div>
-    <a class="btn orange" href="/rescuer">I Need a Ride<br>
-      <span style="font-weight:500;font-size:0.85rem">Rescuer / Colony Manager</span>
-    </a>
-    <a class="btn white" href="/driver">I Can Drive<br>
-      <span style="font-weight:500;font-size:0.85rem">Volunteer</span>
-    </a>
-    <p class="note">Volunteer drivers only · No passenger rides</p>
+    <div class="sub">Community rides for rescue pets in Arizona.</div>
+
+    <a class="btn orange" href="/signup">Create Free Account</a>
+    <a class="btn white" href="/login">Sign In</a>
+
+    <div class="divider">— or go straight to —</div>
+
+    <a class="btn outline" href="/rescuer">I Need a Ride</a>
+    <a class="btn outline" href="/driver">I Can Drive</a>
+
+    <p class="note">Volunteer drivers only · No passenger rides · Free forever</p>
   </div>
 </body>
 </html>
